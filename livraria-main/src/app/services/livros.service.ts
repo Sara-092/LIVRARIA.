@@ -30,14 +30,13 @@ export const CATEGORIAS = [
   { id: 'distopia', nome: 'Distopia', consulta: 'subject:dystopia OR subject:dystopian' },
   { id: 'terror', nome: 'Terror', consulta: 'subject:horror' },
 ];
-
+// APi usamos opn libray do link que marlon colocou no documento 
 @Injectable({ providedIn: 'root' })
 export class LivrosService {
   private http = inject(HttpClient);
   private url = 'https://openlibrary.org/search.json';
   private campos = 'key,title,author_name,cover_i,first_publish_year,subject,edition_count,number_of_pages_median,ratings_average,language,first_sentence';
 
-  // Converte um resultado da API para o formato Livro
   private converter(d: Resultado): Livro {
     return {
       key: d.key,
@@ -54,21 +53,21 @@ export class LivrosService {
     };
   }
 
-  // GET 1: livros por categoria (Home)
+  // GET 1
   porCategoria(consulta: string) {
     return this.http
       .get<{ docs: Resultado[] }>(this.url, { params: { q: consulta, sort: 'editions', limit: 20, fields: this.campos } })
       .pipe(map(res => res.docs.filter(d => d.cover_i).slice(0, 6).map(d => this.converter(d))));
   }
 
-  // GET 2: busca por título ou autor (Lista)
+  // GET 2
   buscar(termo: string) {
     return this.http
       .get<{ docs: Resultado[] }>(this.url, { params: { q: termo.trim() || 'subject:fiction', limit: 30, fields: this.campos } })
       .pipe(map(res => res.docs.map(d => this.converter(d))));
   }
 
-  // GET 3: detalhes de um livro (Detalhes)
+  // GET 3
   detalhes(id: string) {
     return this.http
       .get<{ docs: Resultado[] }>(this.url, { params: { q: 'key:/works/' + id, limit: 1, fields: this.campos } })
